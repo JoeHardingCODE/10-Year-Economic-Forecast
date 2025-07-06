@@ -6,7 +6,7 @@ library(tidyr)
 library(scales)
 
 
-# 2. Fetch and tidy GDP data (current USD)
+#Fetch and tidy GDP data (current USD)
 us_data <- WDI(
   country   = "US",
   indicator = "NY.GDP.MKTP.CD",
@@ -34,7 +34,7 @@ china_data <- WDI(
   )
 
 
-# 3. Convert to trillions USD
+#Convert to trillions USD
 
 prepare_gdp <- function(df) {
   df %>% mutate(GDP_trillion = GDP / 1e12)
@@ -44,10 +44,7 @@ us_data    <- prepare_gdp(us_data)
 china_data <- prepare_gdp(china_data)
 
 
-
-# ──────────────────────────────────────────────────────────────────────────────
-# 4. Fit automatic ARIMA models
-# ──────────────────────────────────────────────────────────────────────────────
+# ARIMA models
 us_ts    <- ts(us_data$GDP_trillion,    start = 1960, frequency = 1)
 china_ts <- ts(china_data$GDP_trillion, start = 1960, frequency = 1)
 
@@ -58,7 +55,7 @@ china_model <- auto.arima(china_ts, seasonal = FALSE, ic = "aicc",
                           stepwise = FALSE, approximation = FALSE)
 
 
-# 5. Generate 11‐year forecast with 90% intervals
+#Generate 11‐year forecast with 90% intervals
 
 forecast_years <- 2025:2035
 horizon        <- length(forecast_years)
@@ -84,7 +81,7 @@ china_fc <- forecast(china_model, h = horizon, level = 90) %>%
   )
 
 
-# 6. Combine historical and forecast data
+#Combine historical and forecast data
 combine_data <- function(hist, fc) {
   hist %>%
     transmute(
@@ -107,20 +104,17 @@ china_combined <- combine_data(china_data, china_fc)
 all_data <- bind_rows(us_combined, china_combined)
 
 
-# 7. Plot (2000–2035): historical & forecast with 95% bands
+#Plot
 ggplot(
   all_data %>% filter(Year >= 2000),
   aes(x = Year, y = GDP_trillion, color = Country, fill = Country)
 ) +
-  # 90% forecast bands (only for Forecast)
   geom_ribbon(
     data = . %>% filter(Type == "Forecast"),
     aes(x = Year, ymin = Lower, ymax = Upper),
     alpha = 0.15
   ) +
-  # Lines: solid = historical, dashed = forecast
   geom_line(aes(linetype = Type), linewidth = 1.2) +
-  # Highlight last observed point (2024)
   geom_point(
     data = . %>% filter(Year == 2024),
     aes(x = Year, y = GDP_trillion),
@@ -129,7 +123,6 @@ ggplot(
     fill  = "white",
     stroke = 1.5
   ) +
-  # Scales & labels
   scale_color_manual(values = c("China" = "red", "United States" = "blue")) +
   scale_fill_manual(values  = c("China" = "red", "United States" = "blue")) +
   scale_linetype_manual(values = c("Historical" = "solid", "Forecast" = "dashed")) +
@@ -164,7 +157,7 @@ ggplot(
     linetype = guide_legend(override.aes = list(fill = NA))
   )
 
-# Print ARIMA model summaries and coefficients
+#Print ARIMA model summaries and coefficients
 cat("United States ARIMA model:\n")
 print(summary(us_model))
 cat("\nModel coefficients (US):\n")
