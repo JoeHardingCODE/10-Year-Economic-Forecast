@@ -1,9 +1,10 @@
-pkgs <- c("unvotes", "dplyr", "tidyr", "igraph", "ggraph", "tidygraph", "scales")
-installed <- rownames(installed.packages())
-for (pkg in pkgs) {
-  if (!pkg %in% installed) install.packages(pkg, repos = "https://cloud.r-project.org")
-  library(pkg, character.only = TRUE)
-}
+library(unvotes)
+library(dplyr)
+library(tidyr)
+library(igraph)
+library(ggraph)
+library(tidygraph)
+library(scales)
 
 #Define major economies with bloc grouping
 eastern <- c("China", "India", "Russia", "Japan", "South Korea")
