@@ -1,6 +1,10 @@
-# install.packages(c("imf.data","dplyr","tidyr","lubridate","ggplot2","scales"))
-library(imf.data); library(dplyr); library(tidyr)
-library(lubridate); library(ggplot2); library(scales)
+
+library(imf.data)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(ggplot2)
+library(scales)
 
 DOT <- load_datasets("DOT")
 
@@ -31,13 +35,13 @@ pull_dots_q <- function(reporter, partner) {
   df2
 }
 
-# Retrieve data
+#Retrieve data
 us_cn <- pull_dots_q("US", "CN")
 cn_us <- pull_dots_q("CN", "US")
 us_wld <- pull_dots_q("US", "W00")
 cn_wld <- pull_dots_q("CN", "W00")
 
-# Compute trade series
+#Compute trade series
 bilateral <- bind_rows(us_cn, cn_us) %>%
   group_by(date) %>%
   summarize(bilateral_trade = mean(total_trade, na.rm = TRUE), .groups = "drop")
@@ -75,9 +79,8 @@ events <- tibble(
   label = c("Trade tensions","COVID19","Ukraine war")
 )
 
-# After creating plot_data and events...
+#plot data and events
 ggplot(plot_data, aes(x = date, y = index, color = series)) +
-  # Event shading
   geom_rect(
     data = events,
     aes(xmin = start, xmax = end, ymin = -Inf, ymax = Inf),
@@ -85,16 +88,13 @@ ggplot(plot_data, aes(x = date, y = index, color = series)) +
     fill = "grey",
     alpha = 0.3
   ) +
-  # Data points
   geom_point(size = 0.9, alpha = 0.6) +
-  # Smoothed trend lines
   geom_smooth(
     method = "loess",
     se = FALSE,
     span = 0.5,
     linewidth = 1
   ) +
-  # Event labels
   geom_text(
     data = events,
     aes(x = start, y = 180, label = label),
@@ -103,7 +103,6 @@ ggplot(plot_data, aes(x = date, y = index, color = series)) +
     vjust = 1,
     size = 3
   ) +
-  # Colors, scales and theme
   scale_color_manual(values = c(
     "US–China trade"         = "purple",
     "U.S. trade w/ other economies"   = "blue",
