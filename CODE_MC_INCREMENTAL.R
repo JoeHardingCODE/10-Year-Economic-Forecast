@@ -3,7 +3,7 @@
 
 set.seed(123)
 
-# 1. Simulation parameters
+#Simulation parameters
 n_sims  <- 5000
 years   <- 2025:2035
 n_years <- length(years)
@@ -23,27 +23,25 @@ results <- expand.grid(sim = 1:n_sims, year = years)
 results$volume <- NA   #cumulative volume index (base=100)
 results$shock_flag  <- NA   #track whether year was a shock
 
-#Run simulations with incremental shock probability
+#Run simulations 
 for (i in 1:n_sims) {
   vol             <- 100.0           # starting index
   current_prob    <- shock_base_prob # start with base probability
   
   for (y in seq_len(n_years)) {
-    #Determine if a shock occurs this year
     is_shock <- (runif(1) < current_prob)
     
-    #Draw protectionist probability based on current year status
+    #Draw protectionist probability
     if (is_shock) {
       growth <- rnorm(1, mean = shock_mean, sd = shock_sd)
       # increase probability for next year, capped at 1.0
       current_prob <- min(current_prob + shock_increment, 1.0)
     } else {
       growth <- rnorm(1, mean = baseline_mean, sd = baseline_sd)
-      # reset probability to base after a non-shock year
       current_prob <- shock_base_prob
     }
     
-    # Update and record volume and shock probability
+    #Update and record volume and shock probability
     vol <- vol * (1 + growth)
     results$volume[results$sim == i & results$year == years[y]] <- vol
     results$shock_flag[results$sim == i & results$year == years[y]] <- is_shock
@@ -63,7 +61,7 @@ summary_df <- results %>%
     p90    = quantile(volume, 0.90)
   )
 
-#Time-series plot: median with 10th/90th percentile bands
+#Time-series plot
 ggplot(summary_df, aes(x = year)) +
   geom_ribbon(aes(ymin = p10, ymax = p90), fill = "lightblue", alpha = 0.5) +
   geom_line(aes(y = median), color = "blue", size = 1) +
@@ -73,7 +71,6 @@ ggplot(summary_df, aes(x = year)) +
   ) +
   theme_minimal()
 
-# Density of final-year volume (2035)
 final_vol <- results %>% filter(year == max(years))
 ggplot(final_vol, aes(x = volume)) +
   geom_density(fill = "lightblue", alpha = 0.7) +
@@ -83,7 +80,7 @@ ggplot(final_vol, aes(x = volume)) +
   ) +
   theme_light()
 
-# Summary statistics for final-year volume
+#Summary statistics
 stats_final <- final_vol %>% summarize(
   mean          = mean(volume),
   median        = median(volume),
