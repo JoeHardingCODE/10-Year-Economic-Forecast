@@ -29,7 +29,7 @@ diff_log <- diff(as.matrix(log_data))  # stationary input for BVAR
 
 #Fit BVAR model
 set.seed(123)
-model <- bvar(diff_log, lags = 2, n_draw = 5000, n_burn = 1000, verbose = FALSE)
+model <- bvar(diff_log, lags = 1, n_draw = 5000, n_burn = 1000, verbose = FALSE)
 
 #Forecast 10 years ahead
 forecast_horizon <- 11
